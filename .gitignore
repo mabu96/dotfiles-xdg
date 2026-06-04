@@ -27,11 +27,23 @@ config/gh/hosts.yml
 # Keep config.json (preferences) tracked, exclude the rest.
 config/raycast/extensions/
 
-# Ollama: model blobs are gigabytes; never commit. .ollama/manifest is tiny so
-# allow tool-managed metadata, but exclude the heavy data dirs.
+# Ollama: model blobs are gigabytes; never commit. id_ed25519 is the local
+# identity Ollama uses to authenticate to ollama.com — keep machine-local.
+# logs/ is regenerable. config.json (preferences) is fine to track.
 home/.ollama/models/
 home/.ollama/blobs/
 home/.ollama/history
+home/.ollama/id_ed25519
+home/.ollama/id_ed25519.pub
+home/.ollama/logs/
+
+# zsh: history and per-session state are machine-/account-local. Track
+# .zprofile/.zshrc/.zlogin (your config) but exclude generated state.
+# The shim symlink config/zsh/.zshenv → ~/.zshenv resolves to an
+# account-specific absolute path and must not be committed.
+config/zsh/.zsh_history
+config/zsh/.zsh_sessions/
+config/zsh/.zshenv
 
 # Defensive: anything in data/ matching 'private*'.
 data/**/private*
