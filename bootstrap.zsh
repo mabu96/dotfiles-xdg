@@ -58,7 +58,7 @@ HOME_LINKS=(
 log()  { print -r -- "  $*"; }
 ok()   { print -r -- "✓ $*"; }
 warn() { print -r -- "! $*" >&2; }
-step() { print -r -- "\n── $* ──"; }
+step() { print -- "\n── $* ──"; }
 
 # Returns a non-colliding backup path for $1 (echoes the path).
 backup_path() {
@@ -77,11 +77,11 @@ ok "git present"
 # ─── 2. skeleton dirs ────────────────────────────────────────────────────────
 step "skeleton"
 for rel in "${SKELETON[@]}"; do
-  path="$REPO_DIR/$rel"
-  if [[ -d $path ]]; then
+  dir="$REPO_DIR/$rel"
+  if [[ -d $dir ]]; then
     log "exists: $rel"
   else
-    mkdir -p $path
+    mkdir -p $dir
     ok "created: $rel"
   fi
 done
@@ -128,7 +128,9 @@ export AIDER_INPUT_HISTORY_FILE="$XDG_STATE_HOME/aider/input.history"
 '
 
 target="$HOME/.zshenv"
-if [[ -f $target && ! -L $target && "$(<$target)" == "$ZSHENV_CONTENT" ]]; then
+# Note: $(<file) strips trailing newlines, so compare against $ZSHENV_CONTENT
+# with its trailing newline stripped too.
+if [[ -f $target && ! -L $target && "$(<$target)" == "${ZSHENV_CONTENT%$'\n'}" ]]; then
   ok ".zshenv already correct"
 else
   if [[ -e $target ]]; then
