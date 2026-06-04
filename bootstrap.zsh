@@ -151,6 +151,30 @@ else
   ok "wrote .zshenv"
 fi
 
+# ─── 4b. ZDOTDIR shim ────────────────────────────────────────────────────────
+# zsh's startup rules: when $ZDOTDIR is set in the env, zsh reads
+# $ZDOTDIR/.zshenv instead of $HOME/.zshenv. Without this shim, anything
+# `exec zsh` (or any new shell spawned from a shell that already exported
+# ZDOTDIR) skips ~/.zshenv entirely — env vars added there don't reach the
+# new shell until the user logs out and back in. Make $ZDOTDIR/.zshenv a
+# symlink to $HOME/.zshenv so both startup paths resolve to the same file.
+step "ZDOTDIR shim"
+shim="$REPO_DIR/config/zsh/.zshenv"
+if [[ -L $shim && "$(readlink $shim)" == "$target" ]]; then
+  ok "shim already present"
+else
+  if [[ -L $shim ]]; then
+    rm $shim
+    log "removed stale shim symlink"
+  elif [[ -e $shim ]]; then
+    bk=$(backup_path $shim)
+    mv $shim $bk
+    log "backed up existing $shim → $bk"
+  fi
+  ln -s $target $shim
+  ok "linked: $shim → $target"
+fi
+
 # ─── 5. symlinks for non-XDG tools ───────────────────────────────────────────
 step "symlinks"
 if (( ${#HOME_LINKS} == 0 )); then

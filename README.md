@@ -57,6 +57,13 @@ Idempotent — run it again any time. Every step prints `ok` / `exists`
    an existing `.zshenv` differs from the canonical content, it gets
    backed up to `.zshenv.bak` (or `.bak.<timestamp>` if `.bak` is
    taken) before being overwritten.
+4b. **`$ZDOTDIR/.zshenv` shim.** Symlinks `$XDG_CONFIG_HOME/zsh/.zshenv`
+   → `~/.zshenv`. zsh's startup rules: when `$ZDOTDIR` is exported in
+   the environment, zsh reads `$ZDOTDIR/.zshenv` instead of
+   `~/.zshenv`. Without the shim, any `exec zsh` from a shell that
+   already has `ZDOTDIR` in env silently skips `~/.zshenv` — new env
+   vars don't reach the new shell until logout + login. The shim
+   makes both paths resolve to the same file.
 5. **Symlink loop.** Walks `HOME_LINKS` and symlinks each
    `$HOME/<file>` to its repo counterpart in `home/`. Empty by default.
 
