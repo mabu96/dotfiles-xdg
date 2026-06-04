@@ -100,6 +100,7 @@ Gemini CLI's `~/.gemini` directory, aider's `~/.aider.conf.yml`):
 | Aider — history | `AIDER_CHAT_HISTORY_FILE`, `AIDER_INPUT_HISTORY_FILE` | ✓ |
 | Aider — config file | (none) | symlink only |
 | Gemini CLI | (none — issue #2815 unimplemented) | symlink only |
+| Ollama | (none — hardcodes `$HOME/.ollama`) | symlink only (active in `HOME_LINKS`) |
 | GnuPG | `GNUPGHOME` | ✓ |
 | less | `LESSHISTFILE` | ✓ |
 | readline | `INPUTRC` | ✓ |
@@ -115,6 +116,25 @@ may expose more `CLAUDE_CODE_*` path vars. Authoritative sources:
 - Aider: https://aider.chat/docs/config/options.html
 - Gemini issue: https://github.com/google-gemini/gemini-cli/issues/2815
 
+## First-run housekeeping (orphaned configs)
+
+Run bootstrap **before** opening any GUI/CLI tools on the fresh account.
+Anything you launch first writes to its default location (`~/.config/<tool>`
+or `~/.<tool>`) because `$XDG_CONFIG_HOME` isn't set yet, and those
+configs stay there orphaned after bootstrap runs.
+
+If that happened, move them into the managed tree:
+
+```sh
+# For XDG-respecting apps that wrote to ~/.config:
+mv ~/.config/<tool> ~/dotfiles/config/<tool>
+rmdir ~/.config 2>/dev/null    # if empty
+
+# For apps that ignore XDG (write to ~/.<tool>):
+mv ~/.<tool> ~/dotfiles/home/.<tool>
+# Add `.tool  home/.<tool>` to HOME_LINKS in bootstrap.zsh, re-run script.
+```
+
 ## Caveats
 
 - **Codex `CODEX_HOME`** holds config *and* logs (`$CODEX_HOME/log`).
@@ -126,6 +146,9 @@ may expose more `CLAUDE_CODE_*` path vars. Authoritative sources:
   ```sh
   alias aider="aider --config $XDG_CONFIG_HOME/aider/config.yml"
   ```
+- **Ollama** hardcodes `$HOME/.ollama` with no env var. Already in
+  `HOME_LINKS`; on first run, `mv ~/.ollama ~/dotfiles/home/.ollama`
+  before re-running bootstrap if the tool wrote to `$HOME` first.
 - **`~/.ssh`** is explicitly off-limits to the script. Manage SSH config
   separately.
 - **Homebrew** is *not* configured by this script. `brew shellenv`

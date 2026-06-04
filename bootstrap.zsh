@@ -43,6 +43,9 @@ SKELETON=(
 # Empty by default. Add entries here as you commit files into home/.
 typeset -A HOME_LINKS
 HOME_LINKS=(
+  # Active relocations (script symlinks each on every run once src exists).
+  .ollama           home/.ollama          # Ollama: hardcodes $HOME/.ollama, no env var.
+
   # Examples (uncomment + commit the source file/dir into the repo before re-running):
   # .bashrc           home/.bashrc
   # .bash_profile     home/.bash_profile
