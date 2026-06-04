@@ -1,0 +1,27 @@
+# Generated state and caches — never commit.
+state/
+cache/
+
+# GPG private keys, entropy, locks — must never be committed.
+config/gnupg/private-keys-v1.d/
+config/gnupg/openpgp-revocs.d/
+config/gnupg/random_seed
+config/gnupg/trustdb.gpg
+config/gnupg/pubring.kbx.lock
+config/gnupg/.gpg-agent*
+
+# AI agent credentials and session tokens — defensive defaults.
+# Add per-tool excludes here as each tool reveals what it writes.
+config/*/credentials*
+config/*/.credentials*
+config/*/auth*
+config/*/.auth*
+config/*/sessions/
+config/*/*.token
+config/*/*.key
+
+# Defensive: anything in data/ matching 'private*'.
+data/**/private*
+
+# macOS Finder noise.
+.DS_Store
