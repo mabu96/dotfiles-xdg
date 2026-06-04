@@ -113,6 +113,8 @@ Gemini CLI's `~/.gemini` directory, aider's `~/.aider.conf.yml`):
 | less | `LESSHISTFILE` | ✓ |
 | readline | `INPUTRC` | ✓ |
 | wget | `WGETRC` | ✓ |
+| npm | `NPM_CONFIG_CACHE`, `NPM_CONFIG_PREFIX` | ✓ cache + global install root |
+| node | `NODE_REPL_HISTORY` | ✓ relocates `~/.node_repl_history` |
 
 **Recheck before each fresh-account setup.** Gemini may add a relocation
 env var in a future release; OpenAI may rename `CODEX_HOME`; Anthropic

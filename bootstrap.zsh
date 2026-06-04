@@ -33,9 +33,12 @@ SKELETON=(
   config/opencode
   config/aider
   data
+  data/npm
   state/less
   state/aider
+  state/node
   cache
+  cache/npm
   home
 )
 
@@ -134,6 +137,16 @@ export AIDER_INPUT_HISTORY_FILE="$XDG_STATE_HOME/aider/input.history"
 
 # Aider has no env var for its config FILE (~/.aider.conf.yml). Relocate via
 # symlink (HOME_LINKS) or use `alias aider="aider --config ..."`.
+
+# npm: keep cache + global install prefix inside the dotfiles tree so a fresh
+# `npm install -g ...` doesn'\''t scatter ~/.npm and ~/.local. The prefix is the
+# install root: binaries land in $NPM_CONFIG_PREFIX/bin, libs in /lib.
+export NPM_CONFIG_CACHE="$XDG_CACHE_HOME/npm"
+export NPM_CONFIG_PREFIX="$XDG_DATA_HOME/npm"
+export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
+
+# node REPL history (default ~/.node_repl_history).
+export NODE_REPL_HISTORY="$XDG_STATE_HOME/node/repl_history"
 '
 
 target="$HOME/.zshenv"

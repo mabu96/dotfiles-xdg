@@ -45,6 +45,10 @@ config/zsh/.zsh_history
 config/zsh/.zsh_sessions/
 config/zsh/.zshenv
 
+# npm global install root (NPM_CONFIG_PREFIX = $XDG_DATA_HOME/npm). Holds
+# bin/ symlinks and lib/node_modules/ — installed packages, regeneratable.
+data/npm/
+
 # Defensive: anything in data/ matching 'private*'.
 data/**/private*
 
