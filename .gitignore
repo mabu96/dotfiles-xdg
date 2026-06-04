@@ -49,6 +49,14 @@ config/zsh/.zshenv
 # bin/ symlinks and lib/node_modules/ — installed packages, regeneratable.
 data/npm/
 
+# ~/.local/bin (via the .local HOME_LINKS symlink) holds binaries from
+# native installers (claude, pip --user, cargo, etc.). Tools, not config —
+# regenerate by re-running the installer.
+home/.local/bin/
+home/.local/lib/
+home/.local/share/
+home/.local/state/
+
 # Defensive: anything in data/ matching 'private*'.
 data/**/private*
 

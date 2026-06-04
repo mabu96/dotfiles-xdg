@@ -40,6 +40,7 @@ SKELETON=(
   cache
   cache/npm
   home
+  home/.local/bin
 )
 
 # $HOME path → repo-relative path. Source must exist in the repo to symlink.
@@ -48,6 +49,7 @@ typeset -A HOME_LINKS
 HOME_LINKS=(
   # Active relocations (script symlinks each on every run once src exists).
   .ollama           home/.ollama          # Ollama: hardcodes $HOME/.ollama, no env var.
+  .local            home/.local           # Anthropic claude installer, pip --user, etc. put binaries in ~/.local/bin.
 
   # Examples (uncomment + commit the source file/dir into the repo before re-running):
   # .bashrc           home/.bashrc
@@ -143,7 +145,12 @@ export AIDER_INPUT_HISTORY_FILE="$XDG_STATE_HOME/aider/input.history"
 # install root: binaries land in $NPM_CONFIG_PREFIX/bin, libs in /lib.
 export NPM_CONFIG_CACHE="$XDG_CACHE_HOME/npm"
 export NPM_CONFIG_PREFIX="$XDG_DATA_HOME/npm"
-export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
+
+# Native installers (Claude Code'\''s `curl ... | bash`, pip --user, cargo, etc.)
+# put binaries in $HOME/.local/bin. Bootstrap symlinks ~/.local to home/.local
+# inside the repo (see HOME_LINKS), so those binaries effectively live in the
+# managed tree. Put it on PATH ahead of the npm prefix.
+export PATH="$HOME/.local/bin:$NPM_CONFIG_PREFIX/bin:$PATH"
 
 # node REPL history (default ~/.node_repl_history).
 export NODE_REPL_HISTORY="$XDG_STATE_HOME/node/repl_history"
