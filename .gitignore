@@ -20,6 +20,19 @@ config/*/sessions/
 config/*/*.token
 config/*/*.key
 
+# gh CLI: hosts.yml contains the auth token. config.yml has preferences (commit-safe).
+config/gh/hosts.yml
+
+# Raycast: extensions/ is regenerated on launch and can be hundreds of MB.
+# Keep config.json (preferences) tracked, exclude the rest.
+config/raycast/extensions/
+
+# Ollama: model blobs are gigabytes; never commit. .ollama/manifest is tiny so
+# allow tool-managed metadata, but exclude the heavy data dirs.
+home/.ollama/models/
+home/.ollama/blobs/
+home/.ollama/history
+
 # Defensive: anything in data/ matching 'private*'.
 data/**/private*
 

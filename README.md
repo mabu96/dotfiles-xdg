@@ -101,6 +101,7 @@ Gemini CLI's `~/.gemini` directory, aider's `~/.aider.conf.yml`):
 | Aider — config file | (none) | symlink only |
 | Gemini CLI | (none — issue #2815 unimplemented) | symlink only |
 | Ollama | (none — hardcodes `$HOME/.ollama`) | symlink only (active in `HOME_LINKS`) |
+| git | `GIT_CONFIG_GLOBAL` | ✓ writes go to `$XDG_CONFIG_HOME/git/config` |
 | GnuPG | `GNUPGHOME` | ✓ |
 | less | `LESSHISTFILE` | ✓ |
 | readline | `INPUTRC` | ✓ |
@@ -119,21 +120,37 @@ may expose more `CLAUDE_CODE_*` path vars. Authoritative sources:
 ## First-run housekeeping (orphaned configs)
 
 Run bootstrap **before** opening any GUI/CLI tools on the fresh account.
-Anything you launch first writes to its default location (`~/.config/<tool>`
-or `~/.<tool>`) because `$XDG_CONFIG_HOME` isn't set yet, and those
-configs stay there orphaned after bootstrap runs.
+Anything you launch first writes to its default location because
+`$XDG_CONFIG_HOME` isn't set yet, and those configs stay there orphaned
+after bootstrap runs.
 
-If that happened, move them into the managed tree:
+**The trap that bites everyone.** Pasting a multi-line block right after
+`zsh ~/dotfiles/bootstrap.zsh && exec zsh` can run commands in the
+*pre-exec* shell where the new env vars aren't loaded yet. Always wait
+for a fresh prompt after `exec zsh` and verify with
+`print $XDG_CONFIG_HOME` before pasting tool commands.
+
+If you got bit anyway, sweep these locations:
 
 ```sh
-# For XDG-respecting apps that wrote to ~/.config:
-mv ~/.config/<tool> ~/dotfiles/config/<tool>
-rmdir ~/.config 2>/dev/null    # if empty
+# XDG-respecting apps that fell back to default ~/.config:
+mv ~/.config/<tool>   ~/dotfiles/config/<tool>
 
-# For apps that ignore XDG (write to ~/.<tool>):
+# State files that fell back to default ~/.local/state:
+mv ~/.local/state/<tool>  ~/dotfiles/state/<tool>
+mv ~/.local/state/lesshst ~/dotfiles/state/less/history
+
+# Apps that ignore XDG entirely (write to ~/.<tool>):
 mv ~/.<tool> ~/dotfiles/home/.<tool>
 # Add `.tool  home/.<tool>` to HOME_LINKS in bootstrap.zsh, re-run script.
+
+# Clean up empty parent dirs:
+rmdir ~/.config ~/.local/state ~/.local 2>/dev/null
 ```
+
+For `gh` specifically: if `~/.config/gh/hosts.yml` exists *and* you have
+a `~/dotfiles/config/gh/hosts.yml`, the `~/.config/` one is usually the
+live one (it has the most recent token). Compare sizes before merging.
 
 ## Caveats
 

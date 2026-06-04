@@ -116,6 +116,12 @@ export LESSHISTFILE="$XDG_STATE_HOME/less/history"
 export INPUTRC="$XDG_CONFIG_HOME/readline/inputrc"
 export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
 
+# git: point the "global" config at the XDG location so `git config --global …`
+# (and helpers like `gh auth setup-git`) write into the managed tree instead of
+# ~/.gitconfig. Git itself reads BOTH ~/.gitconfig and $XDG_CONFIG_HOME/git/config
+# automatically, so this only affects writes.
+export GIT_CONFIG_GLOBAL="$XDG_CONFIG_HOME/git/config"
+
 # AI CLI agents — env vars verified against upstream docs (see README).
 export CLAUDE_CONFIG_DIR="$XDG_CONFIG_HOME/claude"
 export CODEX_HOME="$XDG_CONFIG_HOME/codex"
