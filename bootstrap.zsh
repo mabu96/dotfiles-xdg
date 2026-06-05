@@ -152,6 +152,11 @@ export NPM_CONFIG_PREFIX="$XDG_DATA_HOME/npm"
 # managed tree. Put it on PATH ahead of the npm prefix.
 export PATH="$HOME/.local/bin:$NPM_CONFIG_PREFIX/bin:$PATH"
 
+# Dedupe PATH. zsh ties $path (array) to $PATH (string); typeset -U makes
+# the array unique-only. Without this, every `exec zsh` re-prepends the
+# same entries and PATH grows unbounded across nested shells.
+typeset -U path PATH
+
 # node REPL history (default ~/.node_repl_history).
 export NODE_REPL_HISTORY="$XDG_STATE_HOME/node/repl_history"
 '
