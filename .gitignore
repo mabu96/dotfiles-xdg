@@ -19,12 +19,15 @@ config/*/.auth*
 config/*/sessions/
 config/*/*.token
 config/*/*.key
+config/hermes/.env
+config/hermes/state.db
 
 # gh CLI: hosts.yml contains the auth token. config.yml has preferences (commit-safe).
 config/gh/hosts.yml
 
 # Raycast: extensions/ is regenerated on launch and can be hundreds of MB.
-# Keep config.json (preferences) tracked, exclude the rest.
+config/raycast/config.json
+config/raycast/ai/
 config/raycast/extensions/
 
 # Ollama: model blobs are gigabytes; never commit. id_ed25519 is the local

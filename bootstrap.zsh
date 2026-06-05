@@ -131,6 +131,7 @@ export GIT_CONFIG_GLOBAL="$XDG_CONFIG_HOME/git/config"
 export CLAUDE_CONFIG_DIR="$XDG_CONFIG_HOME/claude"
 export CODEX_HOME="$XDG_CONFIG_HOME/codex"
 export OPENCODE_CONFIG_DIR="$XDG_CONFIG_HOME/opencode"
+export HERMES_HOME="$XDG_CONFIG_HOME/hermes"
 export AIDER_CHAT_HISTORY_FILE="$XDG_STATE_HOME/aider/chat.history.md"
 export AIDER_INPUT_HISTORY_FILE="$XDG_STATE_HOME/aider/input.history"
 

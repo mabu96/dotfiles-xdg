@@ -115,6 +115,7 @@ Gemini CLI's `~/.gemini` directory, aider's `~/.aider.conf.yml`):
 | wget | `WGETRC` | ✓ |
 | npm | `NPM_CONFIG_CACHE`, `NPM_CONFIG_PREFIX` | ✓ cache + global install root |
 | node | `NODE_REPL_HISTORY` | ✓ relocates `~/.node_repl_history` |
+| Hermes | `HERMES_HOME` | ✓ relocates `~/.hermes` |
 
 **Recheck before each fresh-account setup.** Gemini may add a relocation
 env var in a future release; OpenAI may rename `CODEX_HOME`; Anthropic
@@ -184,6 +185,8 @@ live one (it has the most recent token). Compare sizes before merging.
   ```sh
   eval "$(/opt/homebrew/bin/brew shellenv)"
   ```
+- **Raycast** is a native macOS app and uses the Application Support store; versions are captured via `.rayconfig` export.
+- **Hermes** secrets and source are gitignored.
 
 ## Not in scope
 
