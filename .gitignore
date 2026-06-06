@@ -65,3 +65,8 @@ data/**/private*
 
 # macOS Finder noise.
 .DS_Store
+
+# Claude Code / Hermes runtime — tool-generated state, recreated on first run.
+# bootstrap recreates the empty skeleton dirs; nothing under here is hand-authored.
+config/claude/
+config/hermes/

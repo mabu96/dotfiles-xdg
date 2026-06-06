@@ -32,6 +32,7 @@ SKELETON=(
   config/gemini
   config/opencode
   config/aider
+  config/hermes
   data
   data/npm
   state/less

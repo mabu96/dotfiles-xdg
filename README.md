@@ -188,6 +188,24 @@ live one (it has the most recent token). Compare sizes before merging.
 - **Raycast** is a native macOS app and uses the Application Support store; versions are captured via `.rayconfig` export.
 - **Hermes** secrets and source are gitignored.
 
+## macOS packages
+
+Tool *installation* stays out of `bootstrap.zsh` (see "Not in scope"). Packages are
+declared in `Brewfile` and applied with Homebrew Bundle:
+
+```sh
+brew bundle --file=~/dotfiles/Brewfile
+```
+
+- `session-manager-plugin` (cask) — AWS SSM Session Manager plugin. Required on
+  `PATH` by `cloudshell-interface` (`csi`) for `csi ssm`/`execute`/`genie`.
+
+**Shared-Homebrew accounts.** If `/opt/homebrew` is owned by a different account on this
+Mac (here `mabue`), run brew as its owner:
+`sudo -u mabue -H brew bundle --file=~/dotfiles/Brewfile`. Or install the plugin manually
+(it lands in `/usr/local`, system-wide):
+`sudo ln -s /usr/local/sessionmanagerplugin/bin/session-manager-plugin /usr/local/bin/session-manager-plugin`.
+
 ## Not in scope
 
 - Installing Homebrew, mise, asdf, or any tool.
@@ -201,7 +219,6 @@ live one (it has the most recent token). Compare sizes before merging.
 
 - Switch to **GNU Stow** or **chezmoi** when `HOME_LINKS` grows past
   ~20 entries.
-- **Brewfile + `brew bundle`** as a sibling bootstrap script.
 - **macOS `defaults`** and `~/Library/LaunchAgents` automation as a
   third bootstrap.
 - **Per-machine variants** via a `local.zshenv` (sourced last,
