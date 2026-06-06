@@ -164,17 +164,19 @@ export NODE_REPL_HISTORY="$XDG_STATE_HOME/node/repl_history"
 '
 
 target="$HOME/.zshenv"
-# Note: $(<file) strips trailing newlines, so compare against $ZSHENV_CONTENT
-# with its trailing newline stripped too.
-if [[ -f $target && ! -L $target && "$(<$target)" == "${ZSHENV_CONTENT%$'\n'}" ]]; then
+tmp=$(mktemp)
+print -rn -- "$ZSHENV_CONTENT" > "$tmp"
+
+if [[ -f $target && ! -L $target ]] && cmp -s "$target" "$tmp"; then
   ok ".zshenv already correct"
+  rm -f "$tmp"
 else
   if [[ -e $target ]]; then
     bk=$(backup_path $target)
     mv $target $bk
     log "backed up old .zshenv → $bk"
   fi
-  print -rn -- $ZSHENV_CONTENT > $target
+  mv "$tmp" "$target"
   ok "wrote .zshenv"
 fi
 
