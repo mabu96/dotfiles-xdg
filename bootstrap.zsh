@@ -217,6 +217,11 @@ AUTO_LINKS_CONF="$REPO_DIR/home_links.conf"
 if [[ -f "$AUTO_LINKS_CONF" ]]; then
   while IFS=$'\t' read -r rel repo_rel; do
     [[ "$rel" == \#* || -z "$rel" ]] && continue
+    # Reject malformed entries: empty target, absolute paths, path traversal.
+    if [[ -z "$repo_rel" || "$rel" == /* || "$repo_rel" == /* || "$rel" == *'..'* || "$repo_rel" == *'..'* ]]; then
+      warn "skip invalid home_links.conf entry: rel='$rel' repo_rel='$repo_rel'"
+      continue
+    fi
     HOME_LINKS[$rel]="$repo_rel"
   done < "$AUTO_LINKS_CONF"
 fi

@@ -17,7 +17,7 @@ DRY_RUN=false
 
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
 
-mkdir -p "$GUARD_STATE" "$QUARANTINE"
+$DRY_RUN || mkdir -p "$GUARD_STATE" "$QUARANTINE"
 
 # ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -35,7 +35,14 @@ notify() {
   $DRY_RUN && return
   # Fork osascript, give it 2s, kill if still running.
   # osascript can hang in headless/sandboxed environments.
-  osascript -e "display notification \"$body\" with title \"$title\"" &>/dev/null &
+  # Use heredoc + argv to avoid AppleScript injection via title/body.
+  osascript - "$title" "$body" <<'APPLESCRIPT' &>/dev/null &
+on run argv
+  set msgTitle to item 1 of argv
+  set msgBody to item 2 of argv
+  display notification msgBody with title msgTitle
+end run
+APPLESCRIPT
   local pid=$!
   { sleep 2; kill $pid 2>/dev/null; } &>/dev/null &
   wait $pid 2>/dev/null || true
@@ -83,6 +90,11 @@ typeset -aU CONF_ITEMS=()
 if [[ -f "$LINKS_CONF" ]]; then
   while IFS=$'\t' read -r rel _rest; do
     [[ "$rel" == \#* || -z "$rel" ]] && continue
+    # Reject malformed entries: empty target, absolute paths, path traversal.
+    if [[ -z "$_rest" || "$rel" == /* || "$_rest" == /* || "$rel" == *'..'* || "$_rest" == *'..'* ]]; then
+      log "SKIP: invalid home_links.conf entry: rel='$rel' target='$_rest'"
+      continue
+    fi
     CONF_ITEMS+=("$rel")
   done < "$LINKS_CONF"
 fi
@@ -176,9 +188,21 @@ if [[ -d "$config_dir" ]]; then
 
     log "RELOCATE: ~/$rel → dotfiles/config/$name"
     if ! $DRY_RUN; then
-      mv "$item" "$dest"
-      ln -s "$dest" "$item"
-      printf '%s\t%s\n' "$rel" "config/$name" >> "$LINKS_CONF"
+      if ! mv "$item" "$dest"; then
+        log "ERROR: move failed for ~/$rel"
+        continue
+      fi
+      if ! ln -s "$dest" "$item"; then
+        log "ERROR: symlink failed for ~/$rel (restoring original)"
+        mv "$dest" "$item" 2>/dev/null || true
+        continue
+      fi
+      if ! printf '%s\t%s\n' "$rel" "config/$name" >> "$LINKS_CONF"; then
+        log "ERROR: failed writing $LINKS_CONF for ~/$rel"
+        rm -f "$item"
+        mv "$dest" "$item" 2>/dev/null || true
+        continue
+      fi
       notify "dotfiles-guard" "Relocated ~/.config/$name → dotfiles/config/$name"
     fi
     (( actions++ ))
