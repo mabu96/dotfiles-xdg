@@ -7,6 +7,10 @@
 # Usage:
 #   dotfiles-guard              # normal run
 #   dotfiles-guard --dry-run    # preview actions without making changes
+#
+# LaunchAgent:
+#   launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.dotfiles.guard.plist
+#   launchctl bootout   gui/$(id -u) ~/Library/LaunchAgents/com.dotfiles.guard.plist
 
 REPO_DIR="$HOME/dotfiles"
 GUARD_STATE="$REPO_DIR/state/guard"

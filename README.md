@@ -188,6 +188,40 @@ live one (it has the most recent token). Compare sizes before merging.
 - **Raycast** is a native macOS app and uses the Application Support store; versions are captured via `.rayconfig` export.
 - **Hermes** secrets and source are gitignored.
 
+## dotfiles-guard
+
+A background launchd agent that monitors `$HOME` every 30 minutes for
+new dotfiles. It only inspects hidden (dot-prefixed) items and never
+touches regular directories.
+
+| Scenario | Action |
+|---|---|
+| Unknown dotfile appears | Logs + macOS notification (does **not** auto-move) |
+| `.bak` backup file | Quarantined to `state/guard/quarantine/` |
+| Known tools (`.npm`, `.codex`, etc.) | Allowlisted — silently ignored |
+
+### LaunchAgent management
+
+```sh
+# Load (start the agent)
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.dotfiles.guard.plist
+
+# Unload (stop the agent)
+launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.dotfiles.guard.plist
+
+# Check status
+launchctl list | grep dotfiles
+
+# Preview what it would do (no changes)
+~/dotfiles/bin/dotfiles-guard --dry-run
+
+# Logs
+cat ~/dotfiles/state/guard/guard.log
+```
+
+The plist lives at `~/Library/LaunchAgents/com.dotfiles.guard.plist`
+(not tracked in git — contains the absolute home path).
+
 ## macOS packages
 
 Tool *installation* stays out of `bootstrap.zsh` (see "Not in scope"). Packages are
