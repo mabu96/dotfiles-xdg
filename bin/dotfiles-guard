@@ -1,0 +1,194 @@
+#!/usr/bin/env zsh
+# dotfiles-guard — auto-relocate new dotfiles in $HOME into the managed tree.
+#
+# Runs as a launchd agent every 30 minutes. Safe, idempotent, logged.
+# Sends macOS notifications when it takes action.
+#
+# Usage:
+#   dotfiles-guard              # normal run
+#   dotfiles-guard --dry-run    # preview actions without making changes
+
+REPO_DIR="$HOME/dotfiles"
+GUARD_STATE="$REPO_DIR/state/guard"
+GUARD_LOG="$GUARD_STATE/guard.log"
+LINKS_CONF="$REPO_DIR/home_links.conf"
+QUARANTINE="$GUARD_STATE/quarantine"
+DRY_RUN=false
+
+[[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
+
+mkdir -p "$GUARD_STATE" "$QUARANTINE"
+
+# ─── helpers ──────────────────────────────────────────────────────────────────
+
+timestamp() { date +%Y-%m-%dT%H:%M:%S; }
+
+log() {
+  local msg="[$(timestamp)] $*"
+  print -r -- "$msg"
+  $DRY_RUN || print -r -- "$msg" >> "$GUARD_LOG"
+}
+
+notify() {
+  local title="$1" body="$2"
+  log "NOTIFY: $title — $body"
+  $DRY_RUN && return
+  # Fork osascript, give it 2s, kill if still running.
+  # osascript can hang in headless/sandboxed environments.
+  osascript -e "display notification \"$body\" with title \"$title\"" &>/dev/null &
+  local pid=$!
+  { sleep 2; kill $pid 2>/dev/null; } &>/dev/null &
+  wait $pid 2>/dev/null || true
+}
+
+# ─── configuration ───────────────────────────────────────────────────────────
+
+# Items in $HOME that are ALLOWED — never touched. Be generous here;
+# it's safer to skip something than to break it by moving it.
+typeset -aU ALLOWLIST=(
+  # macOS system
+  .CFUserTextEncoding .DS_Store .Trash
+
+  # Managed by bootstrap.zsh (symlinks or bootstrap-written file)
+  .zshenv .zshrc .local .ollama
+
+  # Can't be relocated (no env var / intentionally unmanaged)
+  .gemini .openclaw .cache .config .ssh
+
+  # Tools that keep recreating their default dirs even with env vars set.
+  # Quarantining them wastes disk and they just come back. Ignore them.
+  .npm .codex .claude .hermes
+  .node_repl_history .gitconfig .gitignore_global .lesshst
+  .zsh_history .zsh_sessions .zprofile
+  .vscode-shared .sudo_as_admin_successful
+
+  # Common app data that belongs in $HOME
+  .python_history .idlerc .swiftpm .docker
+  .claude-server-commander
+  .gem .nvm .rbenv .pyenv .rustup .cargo
+  .cups .bash_history .bash_profile .bashrc
+  .viminfo .vimrc .tmux.conf
+
+  # Standard macOS directories — NEVER touch non-hidden dirs.
+  # The guard only acts on dot-prefixed items (see scan loop below).
+  Applications Desktop Documents Downloads Library
+  Movies Music Pictures Public
+
+  # User directories
+  Workspace dotfiles
+)
+
+# Load items already in home_links.conf (don't re-process)
+typeset -aU CONF_ITEMS=()
+if [[ -f "$LINKS_CONF" ]]; then
+  while IFS=$'\t' read -r rel _rest; do
+    [[ "$rel" == \#* || -z "$rel" ]] && continue
+    CONF_ITEMS+=("$rel")
+  done < "$LINKS_CONF"
+fi
+
+# Hardcoded HOME_LINKS in bootstrap.zsh (don't re-process)
+typeset -aU BOOTSTRAP_ITEMS=(
+  .ollama .local
+  .config/linearmouse .config/raycast .config/zed
+)
+
+# ─── scan $HOME ──────────────────────────────────────────────────────────────
+
+log "=== guard scan starting ==="
+actions=0
+
+for item in "$HOME"/.*(DN); do
+  name="${item:t}"
+
+  # Skip . and ..
+  [[ "$name" == "." || "$name" == ".." ]] && continue
+
+  # Skip allowlist
+  (( ${ALLOWLIST[(Ie)$name]} )) && continue
+
+  # Skip if already a symlink pointing into dotfiles
+  if [[ -L "$item" ]]; then
+    target="$(readlink "$item" 2>/dev/null)"
+    [[ "$target" == *dotfiles* ]] && continue
+  fi
+
+  # Skip if managed by home_links.conf or bootstrap HOME_LINKS
+  (( ${CONF_ITEMS[(Ie)$name]} )) && continue
+  (( ${BOOTSTRAP_ITEMS[(Ie)$name]} )) && continue
+
+  # Skip lock/socket/pid files (transient)
+  [[ "$name" == *.lock || "$name" == *.sock || "$name" == *.pid ]] && continue
+
+  # .bak files → quarantine (bootstrap artifacts, always safe to clean)
+  if [[ "$name" == *.bak* ]]; then
+    log "QUARANTINE: ~/$name (backup file)"
+    if ! $DRY_RUN; then
+      mv "$item" "$QUARANTINE/${name}.$(date +%Y%m%d%H%M%S)"
+      notify "dotfiles-guard" "Quarantined backup: ~/$name"
+    fi
+    (( actions++ ))
+    continue
+  fi
+
+  # Unknown dotfile — LOG ONLY, do NOT auto-move.
+  # Moving things blindly breaks mount points, app state, etc.
+  log "UNKNOWN: ~/$name — new dotfile detected (not in allowlist)"
+  notify "dotfiles-guard" "New dotfile: ~/$name — review needed"
+  (( actions++ ))
+done
+
+# ─── scan ~/.config/ ─────────────────────────────────────────────────────────
+
+config_dir="$HOME/.config"
+if [[ -d "$config_dir" ]]; then
+  for item in "$config_dir"/*(DN); do
+    name="${item:t}"
+    rel=".config/$name"
+
+    # Skip Finder noise
+    [[ "$name" == .DS_Store ]] && continue
+
+    # Skip if already a symlink into dotfiles
+    if [[ -L "$item" ]]; then
+      target="$(readlink "$item" 2>/dev/null)"
+      [[ "$target" == *dotfiles* ]] && continue
+    fi
+
+    # Skip if already managed
+    (( ${CONF_ITEMS[(Ie)$rel]} )) && continue
+    (( ${BOOTSTRAP_ITEMS[(Ie)$rel]} )) && continue
+
+    # Destination in dotfiles/config/
+    dest="$REPO_DIR/config/$name"
+    if [[ -e "$dest" ]]; then
+      # If destination has content already, don't clobber it
+      if [[ -d "$dest" && -n "$(ls -A "$dest" 2>/dev/null)" ]]; then
+        log "SKIP: ~/$rel — dotfiles/config/$name already has content"
+        continue
+      elif [[ -f "$dest" ]]; then
+        log "SKIP: ~/$rel — dotfiles/config/$name already exists as file"
+        continue
+      fi
+      # Empty skeleton dir — remove so mv can replace it
+      rmdir "$dest" 2>/dev/null || true
+    fi
+
+    log "RELOCATE: ~/$rel → dotfiles/config/$name"
+    if ! $DRY_RUN; then
+      mv "$item" "$dest"
+      ln -s "$dest" "$item"
+      printf '%s\t%s\n' "$rel" "config/$name" >> "$LINKS_CONF"
+      notify "dotfiles-guard" "Relocated ~/.config/$name → dotfiles/config/$name"
+    fi
+    (( actions++ ))
+  done
+fi
+
+# ─── summary ─────────────────────────────────────────────────────────────────
+
+if (( actions == 0 )); then
+  log "=== scan complete — home directory clean ==="
+else
+  log "=== scan complete — $actions action(s) taken ==="
+fi

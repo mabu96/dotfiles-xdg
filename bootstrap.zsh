@@ -52,6 +52,11 @@ HOME_LINKS=(
   .ollama           home/.ollama          # Ollama: hardcodes $HOME/.ollama, no env var.
   .local            home/.local           # Anthropic claude installer, pip --user, etc. put binaries in ~/.local/bin.
 
+  # Apps that hardcode ~/.config/<app> (don't respect $XDG_CONFIG_HOME).
+  .config/linearmouse   config/linearmouse
+  .config/raycast       config/raycast
+  .config/zed           config/zed
+
   # Examples (uncomment + commit the source file/dir into the repo before re-running):
   # .bashrc           home/.bashrc
   # .bash_profile     home/.bash_profile
@@ -206,6 +211,16 @@ fi
 
 # ─── 5. symlinks for non-XDG tools ───────────────────────────────────────────
 step "symlinks"
+
+# Merge auto-discovered entries from home_links.conf (managed by dotfiles-guard).
+AUTO_LINKS_CONF="$REPO_DIR/home_links.conf"
+if [[ -f "$AUTO_LINKS_CONF" ]]; then
+  while IFS=$'\t' read -r rel repo_rel; do
+    [[ "$rel" == \#* || -z "$rel" ]] && continue
+    HOME_LINKS[$rel]="$repo_rel"
+  done < "$AUTO_LINKS_CONF"
+fi
+
 if (( ${#HOME_LINKS} == 0 )); then
   log "(none configured — add entries to HOME_LINKS as you populate home/)"
 else
@@ -238,6 +253,7 @@ else
       log "backed up $rel → $bk"
     fi
 
+    mkdir -p "${dst:h}"   # ensure parent exists (e.g. ~/.config/ for .config/linearmouse)
     ln -s $src $dst
     ok "linked: $rel → $src"
   done

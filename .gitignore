@@ -70,3 +70,7 @@ data/**/private*
 # bootstrap recreates the empty skeleton dirs; nothing under here is hand-authored.
 config/claude/
 config/hermes/
+
+# dotfiles-guard: auto-discovered links are machine-specific.
+# state/guard/ (log + quarantine) is already covered by state/ above.
+home_links.conf
