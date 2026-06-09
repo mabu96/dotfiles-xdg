@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+# Wrapper for com.dotfiles.bootstrap LaunchAgent.
+# launchd does not expand $HOME in plist StandardOutPath fields, and the log
+# directory may not exist on a fresh account before bootstrap runs. This wrapper
+# creates the log dir first, then exec's bootstrap with output captured.
+
+LOG_DIR="$HOME/.local/state/dotfiles"
+LOG_FILE="$LOG_DIR/bootstrap.log"
+
+mkdir -p "$LOG_DIR"
+exec /bin/zsh /Users/Shared/dotfiles/bootstrap.zsh >>"$LOG_FILE" 2>&1

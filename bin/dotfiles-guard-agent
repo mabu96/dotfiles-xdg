@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+# Wrapper for com.dotfiles.guard LaunchAgent.
+# Creates per-user state dirs before exec'ing the guard script so the
+# guard's log/quarantine dirs exist on a fresh account.
+
+GUARD_STATE="$HOME/.local/state/guard"
+LOG_FILE="$GUARD_STATE/launchd.log"
+
+mkdir -p "$GUARD_STATE/quarantine"
+exec /bin/zsh /Users/Shared/dotfiles/bin/dotfiles-guard >>"$LOG_FILE" 2>&1

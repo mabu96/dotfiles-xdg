@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.dotfiles.guard</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/zsh</string>
+        <string>/Users/Shared/dotfiles/bin/dotfiles-guard-agent</string>
+    </array>
+    <!-- Run every 30 minutes. -->
+    <key>StartInterval</key>
+    <integer>1800</integer>
+    <!-- Also run immediately on load (catches anything from boot to first interval). -->
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <false/>
+    <!-- Low priority — don't compete with real work. -->
+    <key>Nice</key>
+    <integer>10</integer>
+</dict>
+</plist>

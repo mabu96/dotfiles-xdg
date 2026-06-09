@@ -1,0 +1,57 @@
+# Per-user XDG dirs (state, cache, data) now live at $HOME, not in this repo.
+# Only the shared version-controlled config lives here.
+
+# GPG private keys, entropy, locks — must never be committed.
+config/gnupg/private-keys-v1.d/
+config/gnupg/openpgp-revocs.d/
+config/gnupg/random_seed
+config/gnupg/trustdb.gpg
+config/gnupg/pubring.kbx.lock
+config/gnupg/.gpg-agent*
+
+# AI agent credentials and session tokens — defensive defaults.
+config/*/credentials*
+config/*/.credentials*
+config/*/auth*
+config/*/.auth*
+config/*/sessions/
+config/*/*.token
+config/*/*.key
+config/hermes/.env
+config/hermes/state.db
+
+# gh CLI: hosts.yml contains the auth token. config.yml has preferences (commit-safe).
+config/gh/hosts.yml
+
+# Raycast: extensions/ is regenerated on launch and can be hundreds of MB.
+config/raycast/config.json
+config/raycast/ai/
+config/raycast/extensions/
+
+# Ollama: model blobs are gigabytes; never commit. id_ed25519 is the local
+# identity Ollama uses to authenticate to ollama.com — keep machine-local.
+home/.ollama/models/
+home/.ollama/blobs/
+home/.ollama/history
+home/.ollama/id_ed25519
+home/.ollama/id_ed25519.pub
+home/.ollama/logs/
+
+# zsh: history and per-session state are per-user and machine-local.
+# config/zsh/.zshenv IS tracked (canonical shared content; $HOME/.zshenv symlinks to it).
+config/zsh/.zsh_history
+config/zsh/.zsh_sessions/
+
+# Defensive: anything in home/ matching 'private*'.
+home/**/private*
+
+# macOS Finder noise.
+.DS_Store
+
+# Claude Code / Hermes runtime — tool-generated state, recreated on first run.
+config/claude/
+config/hermes/
+
+# dotfiles-guard: home_links.conf is written per-account by the guard agent.
+# Lives at the repo root; gitignored so each account can write without dirty state.
+home_links.conf

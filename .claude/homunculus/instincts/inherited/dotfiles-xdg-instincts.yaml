@@ -1,0 +1,320 @@
+# Instincts generated from https://github.com/mabue777/dotfiles-xdg
+# Generated: 2026-06-09T02:16:03.612Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: dotfiles-xdg-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: fix, feat
+
+## Evidence
+
+- 2 commits analyzed
+- Detected conventional commit pattern
+- Examples: fix: use cmp -s for .zshenv idempotency check, feat: add dotfiles-guard launchd agent
+
+---
+id: dotfiles-xdg-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Commit Length
+
+## Action
+
+Keep commit messages concise (~42 characters)
+
+## Evidence
+
+- Average commit message length: 42 chars
+- Based on 2 commits
+
+---
+id: dotfiles-xdg-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: dotfiles-xdg-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: dotfiles-xdg-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: dotfiles-xdg-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: dotfiles-xdg-instinct-file-naming
+trigger: "When creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Instinct File Naming
+
+## Action
+
+Name the file using camelCase
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.files
+
+---
+id: dotfiles-xdg-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Instinct Function Naming
+
+## Action
+
+Name the function using camelCase
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.functions
+
+---
+id: dotfiles-xdg-instinct-class-naming
+trigger: "When defining a new class"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Instinct Class Naming
+
+## Action
+
+Name the class using PascalCase
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.classes
+
+---
+id: dotfiles-xdg-instinct-constant-naming
+trigger: "When declaring a constant"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Instinct Constant Naming
+
+## Action
+
+Name the constant using SCREAMING_SNAKE_CASE
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.constants
+
+---
+id: dotfiles-xdg-instinct-import-style
+trigger: "When importing modules"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Instinct Import Style
+
+## Action
+
+Use relative import paths
+
+## Evidence
+
+- Pattern in codeStyle.importStyle
+
+---
+id: dotfiles-xdg-instinct-export-style
+trigger: "When exporting from a module"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Instinct Export Style
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in codeStyle.exportStyle
+
+---
+id: dotfiles-xdg-instinct-git-commit-prefix
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Instinct Git Commit Prefix
+
+## Action
+
+Start the message with a conventional prefix such as 'fix' or 'feat'
+
+## Evidence
+
+- Seen in commit: 'fix: use cmp -s for .zshenv idempotency check'
+- Seen in commit: 'feat: add dotfiles-guard launchd agent'
+- Pattern in commits.prefixes
+
+---
+id: dotfiles-xdg-instinct-git-commit-length
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Instinct Git Commit Length
+
+## Action
+
+Keep the commit message concise, around 42 characters on average
+
+## Evidence
+
+- Pattern in commits.averageLength
+
+---
+id: dotfiles-xdg-instinct-git-commit-format
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Instinct Git Commit Format
+
+## Action
+
+Follow the conventional commit format: <type>: <description>
+
+## Evidence
+
+- Pattern in commits.type
+- Examples in commits.examples
+
+---
+id: dotfiles-xdg-instinct-test-location
+trigger: "When adding new tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: mabue777/dotfiles-xdg
+---
+
+# Dotfiles Xdg Instinct Test Location
+
+## Action
+
+Place test files in a separate directory from source files
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation
+
