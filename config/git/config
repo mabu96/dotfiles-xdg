@@ -12,3 +12,5 @@
 [user]
 	name = mabue77
 	email = marbue23.access.vault@proton.me
+[safe]
+	directory = /Users/Shared/dotfiles
