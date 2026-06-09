@@ -52,6 +52,11 @@ HOME_LINKS=(
   .ollama           home/.ollama          # Ollama: hardcodes $HOME/.ollama, no env var.
   .local            home/.local           # Anthropic claude installer, pip --user, etc. put binaries in ~/.local/bin.
 
+  # Apps that hardcode ~/.config/<app> (don't respect $XDG_CONFIG_HOME).
+  .config/linearmouse   config/linearmouse
+  .config/raycast       config/raycast
+  .config/zed           config/zed
+
   # Examples (uncomment + commit the source file/dir into the repo before re-running):
   # .bashrc           home/.bashrc
   # .bash_profile     home/.bash_profile
@@ -164,17 +169,19 @@ export NODE_REPL_HISTORY="$XDG_STATE_HOME/node/repl_history"
 '
 
 target="$HOME/.zshenv"
-# Note: $(<file) strips trailing newlines, so compare against $ZSHENV_CONTENT
-# with its trailing newline stripped too.
-if [[ -f $target && ! -L $target && "$(<$target)" == "${ZSHENV_CONTENT%$'\n'}" ]]; then
+tmp=$(mktemp)
+print -rn -- "$ZSHENV_CONTENT" > "$tmp"
+
+if [[ -f $target && ! -L $target ]] && cmp -s "$target" "$tmp"; then
   ok ".zshenv already correct"
+  rm -f "$tmp"
 else
   if [[ -e $target ]]; then
     bk=$(backup_path $target)
     mv $target $bk
     log "backed up old .zshenv → $bk"
   fi
-  print -rn -- $ZSHENV_CONTENT > $target
+  mv "$tmp" "$target"
   ok "wrote .zshenv"
 fi
 
@@ -204,6 +211,21 @@ fi
 
 # ─── 5. symlinks for non-XDG tools ───────────────────────────────────────────
 step "symlinks"
+
+# Merge auto-discovered entries from home_links.conf (managed by dotfiles-guard).
+AUTO_LINKS_CONF="$REPO_DIR/home_links.conf"
+if [[ -f "$AUTO_LINKS_CONF" ]]; then
+  while IFS=$'\t' read -r rel repo_rel; do
+    [[ "$rel" == \#* || -z "$rel" ]] && continue
+    # Reject malformed entries: empty target, absolute paths, path traversal.
+    if [[ -z "$repo_rel" || "$rel" == /* || "$repo_rel" == /* || "$rel" == *'..'* || "$repo_rel" == *'..'* ]]; then
+      warn "skip invalid home_links.conf entry: rel='$rel' repo_rel='$repo_rel'"
+      continue
+    fi
+    HOME_LINKS[$rel]="$repo_rel"
+  done < "$AUTO_LINKS_CONF"
+fi
+
 if (( ${#HOME_LINKS} == 0 )); then
   log "(none configured — add entries to HOME_LINKS as you populate home/)"
 else
@@ -236,6 +258,7 @@ else
       log "backed up $rel → $bk"
     fi
 
+    mkdir -p "${dst:h}"   # ensure parent exists (e.g. ~/.config/ for .config/linearmouse)
     ln -s $src $dst
     ok "linked: $rel → $src"
   done
