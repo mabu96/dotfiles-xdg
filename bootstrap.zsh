@@ -200,9 +200,9 @@ done
 step "git"
 
 # Add safe.directory before any git operations on the shared repo.
-# Use the shared git config (GIT_CONFIG_GLOBAL) explicitly — consistent
-# whether .zshenv has been loaded yet or not on this account.
-export GIT_CONFIG_GLOBAL="${GIT_CONFIG_GLOBAL:-$SHARED_DIR/config/git/config}"
+# Always point at the shared git config, overriding whatever a stale .zshenv
+# may have written into the environment (prevents old $HOME/dotfiles path errors).
+export GIT_CONFIG_GLOBAL="$SHARED_DIR/config/git/config"
 git config --global --get-all safe.directory 2>/dev/null | \
   grep -qxF "$SHARED_DIR" || \
   git config --global --add safe.directory "$SHARED_DIR"
@@ -210,10 +210,10 @@ ok "safe.directory set in $GIT_CONFIG_GLOBAL"
 
 if [[ -d $SHARED_DIR/.git ]]; then
   ok "shared repo already initialized"
-  git -C "$SHARED_DIR" config core.sharedRepository=group
+  git -C "$SHARED_DIR" config core.sharedRepository group
 else
   git -C "$SHARED_DIR" init -q
-  git -C "$SHARED_DIR" config core.sharedRepository=group
+  git -C "$SHARED_DIR" config core.sharedRepository group
   ok "initialized shared repo at $SHARED_DIR"
 fi
 
